@@ -1,0 +1,288 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.25cm]{geometry}
+\usepackage{lmodern,amsmath,amssymb,graphicx,booktabs,array,longtable}
+\usepackage{xcolor,fancyhdr,hyperref}
+\definecolor{azul}{RGB}{28,58,105}
+\hypersetup{colorlinks=true,linkcolor=azul,urlcolor=azul,pdftitle={Modelado predictivo del tráfico e ingresos en peajes colombianos},pdfauthor={Bamsi Mendez Posada}}
+\graphicspath{{../figuras/}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Peajes colombianos | Workshop 2025}\fancyhead[R]{\small Informe técnico}\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}\setlength{\parskip}{6pt}\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{2em}
+\newcommand{\campo}[1]{\nolinkurl{#1}}
+\newcommand{\figura}[3]{\begin{figure}[htbp]\centering\includegraphics[width=#2\linewidth]{#1}\caption{#3}\end{figure}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}\raggedright\hyphenpenalty=10000
+\vspace*{1.7cm}
+{\color{azul}\Large Universidad Nacional de Colombia\\[3pt]Sede Manizales}\par
+\vspace{1.7cm}
+{\color{azul}\Huge\bfseries Modelado predictivo del tráfico e ingresos en peajes colombianos}\par
+\vspace{.5cm}{\Large Comparación de regresión, ensambles y redes neuronales}\par
+\vspace{1cm}{\large Bamsi Mendez Posada\\Ciencias de la Computación}\par
+\vspace{.8cm}{\large Primer póster: Workshop Nuevas Tendencias en Estadística, 2025}\par
+\vspace{1cm}\hrule\vspace{.5cm}
+\textbf{Informe técnico retrospectivo para el repositorio del proyecto.}
+Este documento reconstruye los datos, el procedimiento y los resultados respaldados por los archivos conservados. Complementa el póster original con una revisión metodológica realizada el 8 de noviembre de 2026.
+
+Se distingue entre métricas históricas, afirmaciones del póster y hallazgos de auditoría. La revisión no convierte retrospectivamente los experimentos originales en una evaluación corregida.
+\vfill
+{\color{azul}\large Aprendizaje automático aplicado a datos tabulares de transporte}\par
+\end{titlepage}
+\hypersetup{pageanchor=true}
+
+\section*{Resumen}
+El estudio compara métodos de aprendizaje supervisado para estimar el tráfico promedio diario y el ingreso promedio diario de peajes colombianos. El conjunto disponible contiene 26.986 registros, 119 nombres de peajes y siete categorías tarifarias, con intervalos comprendidos entre enero de 2019 y febrero de 2022. Se consideran regresión lineal, Random Forest, XGBoost, regresión de vectores de soporte y perceptrones multicapa. Además de la predicción de tráfico, se explora un esquema en cascada que incorpora una predicción previa de tráfico al modelo de ingresos.
+
+Las salidas conservadas del notebook intermedio muestran, para tráfico, un $R^2$ de 0,883271 en Random Forest y 0,881571 en XGBoost, frente a 0,463083 en regresión lineal y un valor negativo en SVR. Un MLP simple registra un $R^2$ de 0,8803. Estos resultados proceden de una partición aleatoria de filas y describen el experimento histórico.
+
+La revisión identifica límites que afectan su interpretación: ausencia de una validación temporal documentada, preprocesamiento neuronal anterior a la separación de datos, reutilización del conjunto de prueba para comparar variantes y fuga de información en la cascada clásica. También verifica que el ingreso es una variable derivada: tarifa multiplicada por tráfico. Por ello, la comparación futura debe incluir como referencia el producto de la tarifa por el tráfico predicho. El proyecto constituye un estudio exploratorio y formativo; las conclusiones sobre generalización y operación requieren validación adicional.
+
+\section{Problema, objetivos y alcance}
+La gestión de un peaje requiere estimar cuántos vehículos pasarán por una estación y qué ingreso correspondería a ese flujo. El conjunto utilizado organiza registros por estación, categoría e intervalo tarifario. En lugar de modelar únicamente una serie temporal, el experimento plantea una regresión tabular con información del peaje, la tarifa, el tipo de vehículo y la duración del registro.
+
+El objetivo principal es comparar la capacidad de distintos algoritmos para aproximar estas relaciones. Los objetivos específicos son describir los datos, construir variables diarias comparables, contrastar modelos lineales y no lineales y explorar si una segunda etapa neuronal o de ensambles representa adecuadamente los ingresos.
+
+\textbf{Unidad de observación.} Cada fila representa un registro de peaje y categoría durante un intervalo. No representa necesariamente un día, un vehículo individual ni una estación completa. Las predicciones se expresan por registro y categoría. Para obtener un total de estación deben agregarse categorías compatibles sin duplicar periodos.
+
+\textbf{Alcance.} La división aleatoria original mide desempeño entre filas del mismo conjunto. No demuestra pronóstico de meses futuros ni transferencia a peajes desconocidos. La tarifa se trata como predictor observado; el modelo no identifica el efecto causal de cambiarla.
+\par\medskip
+
+\section{Datos, procedencia y construcción de variables}
+\subsection{Material disponible y trazabilidad}
+La reconstrucción se apoya en un CSV procesado, tres notebooks, dieciséis figuras PNG y versiones del póster. El póster con referencias se conserva como documento principal. El notebook de 74 celdas contiene el recorrido más amplio; la versión de 46 celdas conserva salidas numéricas útiles; la de 45 celdas registra pasos de preparación desde un archivo bruto no incluido.
+
+El póster atribuye los datos a Kaggle, pero los materiales no identifican de manera inequívoca su página, autor ni licencia. Los notebooks utilizan enlaces de Dropbox como mecanismo de lectura. Estos enlaces no establecen autoría o permisos del conjunto. El repositorio documenta esta limitación y conserva el CSV recibido, sin atribuirle una licencia nueva.
+
+\begin{table}[ht]\centering
+\caption{Inventario verificado directamente en el CSV recibido.}
+\begin{tabular}{lr}\toprule
+Propiedad & Valor\\\midrule
+Registros & 26.986\\
+Variables analíticas & 16\\
+Columna adicional de exportación & 1\\
+Nombres de peajes distintos & 119\\
+Inicio mínimo de intervalo & 2019-01-01\\
+Fin máximo de intervalo & 2022-02-28\\
+Valores faltantes en el archivo procesado & 0\\
+Duplicados completos sin índice de exportación & 0\\\bottomrule
+\end{tabular}\end{table}
+
+La ausencia de nulos en el CSV procesado no significa que el conjunto bruto estuviera completo. El notebook inicial ejecuta \campo{dropna} antes de las operaciones posteriores de imputación; por tanto, una parte de las filas con datos faltantes ya había sido eliminada. Sin el archivo bruto no puede reconstruirse exhaustivamente el efecto de esa selección.
+
+\subsection{Variables derivadas y unidades}
+Sean $N_i$ el tráfico registrado, $p_i$ la tarifa en COP y $d_i$ la duración en días. La preparación original define:
+\begin{align}
+d_i &= \text{FechaHasta}_i-\text{FechaDesde}_i,\\
+T_i &= N_i/d_i,\\
+I_i^{\mathrm{total}} &= p_iN_i,\\
+I_i &= I_i^{\mathrm{total}}/d_i=p_iT_i.
+\end{align}
+Se eliminan duraciones no positivas. Los valores presentes van de 1 a 30 días. El cálculo utiliza diferencia de fechas sin sumar un día. Si ambos extremos fueran inclusivos, la exposición correcta sería $d_i+1$. La semántica de los intervalos debe verificarse con la fuente antes de alterar esta definición: el repositorio preserva la usada en 2025.
+
+\textbf{Ingreso calculado.} El producto tarifa por tráfico no es una medición contable independiente. Tampoco demuestra recaudo neto observado, ni incorpora automáticamente evasores, exenciones, descuentos o costos de operación. Esa distinción es fundamental al interpretar la segunda tarea.
+\par\medskip
+
+\subsection{Categorías, coordenadas y distribución}
+El filtro conserva las categorías I a VII. Las etiquetas de tipo de vehículo son una recodificación aplicada en el notebook; no se ha verificado que su interpretación sea uniforme entre todas las concesiones. Las categorías I--V contienen entre 4.367 y 4.395 filas cada una; VI y VII contienen 2.629 y 2.485, respectivamente.
+
+Los campos geográficos están intercambiados en el CSV: \campo{Lat} contiene valores entre $-77,41$ y $-72,09$, mientras que \campo{Lon} contiene valores entre $1,09$ y $11,44$. Por sus rangos, corresponden a longitud y latitud, respectivamente. El archivo se preserva sin modificar y el mapa conservado en el notebook editorial usa los campos en el orden adecuado.
+
+\begin{table}[ht]\centering\small
+\caption{Distribución de variables principales; cálculos sobre el CSV.}
+\begin{tabular}{lrrr}\toprule
+Estadístico & Tarifa (COP) & Tráfico (veh./día) & Ingreso (COP/día)\\\midrule
+Media & 24.777,62 & 951,68 & 12.572.270\textsuperscript{a}\\
+Mediana & 19.600,00 & 240,90 & 5.100.338\textsuperscript{a}\\
+Mínimo & 0 & 0 & 0\\
+Máximo & 142.700 & 80.360 & 699.132.000\\\bottomrule
+\end{tabular}
+\\[3pt]\footnotesize\textsuperscript{a}Cifras aproximadas; la salida de precisión completa está en el CSV de estadísticas.
+\end{table}
+
+\section{Análisis exploratorio}
+La diferencia entre media y mediana del tráfico indica una distribución asimétrica, con unos pocos registros muy altos. Esto importa porque el RMSE penaliza los errores grandes con mayor intensidad que el MAE. Dos modelos pueden presentar errores absolutos medios parecidos y diferir de manera importante al aproximar observaciones extremas.
+
+\figura{relacion_valor_tarifa_y_trafico_promedio_diario.png}{.83}{Figura histórica: tarifa y tráfico diario por tipo de vehículo. La asociación observada mezcla estación, categoría y periodo; no identifica elasticidad causal.}
+
+El diagrama tarifa--tráfico muestra heterogeneidad entre tipos de vehículo y una concentración del tráfico en tarifas bajas. Interpretarlo como una curva de demanda ignoraría diferencias de localización, infraestructura y composición vehicular. Conviene comparar dentro de estación y categoría y considerar el periodo del registro.
+\par\medskip
+
+\figura{serie_tiempo_trafico_nacional.png}{.9}{Figura histórica: suma mensual del tráfico asignada al mes de inicio del registro. Es una agregación del conjunto disponible, no una garantía de cobertura nacional completa.}
+
+La serie mensual exhibe una caída marcada alrededor de 2020 y una recuperación posterior. El gráfico permite reconocer un cambio de régimen, pero no atribuir causalidad con estos datos únicamente. El extremo final llega a febrero de 2022, por lo que no debe compararse con años completos sin tener en cuenta esa cobertura.
+
+El código agrupa \campo{Trafico} mediante el mes de \campo{FechaDesde}. No distribuye intervalos que crucen meses ni ajusta cambios en el número de estaciones observadas. Por ello, se interpreta como evolución de registros disponibles. Además, el título del póster menciona tráfico promedio diario, aunque el código que genera esta figura suma tráfico total mensual.
+
+\figura{matriz_de_correlacion_peajes.png}{.69}{Figura histórica: correlaciones numéricas. Las relaciones entre tráfico e ingresos incluyen dependencias algebraicas introducidas al construir las variables.}
+
+Una correlación alta entre ingreso y tráfico es esperable porque $I_i=p_iT_i$. No constituye evidencia independiente de un mecanismo económico. Para evitar fuga directa, ni el ingreso real ni el tráfico real deben introducirse como predictores de la tarea de tráfico.
+\par\medskip
+
+\section{Modelos y preprocesamiento}
+\subsection{Predictores y separación}
+La tarea principal utiliza tarifa, tipo de vehículo, peaje y duración del periodo. El objetivo es \campo{TraficoPromedioDiario}. Se separa el 80\,\% de las filas para entrenamiento y el 20\,\% para prueba mediante \campo{train_test_split}, con semilla 42. Esto produce 21.588 filas de entrenamiento y 5.398 de prueba.
+
+La tarifa se estandariza mediante $z=(p-\bar p_{\mathrm{train}})/s_{\mathrm{train}}$. Tipo de vehículo, estación y duración se codifican mediante variables indicadoras, eliminando una categoría de referencia. Tratar duración como categoría permite efectos discretos, pero no representa automáticamente el significado de exposición temporal. Debe compararse con una codificación numérica en trabajos posteriores.
+
+En los modelos clásicos, el preprocesador forma parte de un \campo{Pipeline}: se ajusta usando entrenamiento. En los experimentos neuronales, algunas transformaciones se ajustan sobre el conjunto completo antes de separar. Las dos situaciones no ofrecen el mismo control frente a contaminación entre particiones.
+
+\subsection{Familias de modelos}
+\textbf{Regresión lineal.} Aproxima la respuesta como combinación de predictores transformados. Constituye una referencia interpretable, pero sin interacciones explícitas puede representar de manera insuficiente la heterogeneidad entre estaciones, categorías y tarifas.
+
+\textbf{Random Forest.} Promedia árboles entrenados con aleatorización. El notebook utiliza 100 árboles y semilla 42. Puede capturar umbrales e interacciones sin especificarlos de antemano. La importancia de variables mostrada en el proyecto deriva de las reducciones de impureza del bosque; no equivale a un efecto causal y puede favorecer variables con muchas oportunidades de división.
+
+\textbf{XGBoost.} Construye árboles de manera secuencial para reducir errores residuales mediante boosting. El notebook especifica semilla 42 y deja otros parámetros en sus valores predeterminados. Sin versiones de librerías registradas en 2025, no es posible garantizar que esos valores coincidan con un entorno nuevo.
+
+\textbf{SVR.} Utiliza un kernel radial para representar relaciones no lineales. El experimento mantiene los hiperparámetros predeterminados y no escala el objetivo. Su bajo desempeño describe esta configuración particular; no permite concluir que toda regresión de vectores de soporte sea inadecuada para el problema.
+
+\textbf{MLP.} La red simple contiene capas densas de 64 y 32 unidades con activación ReLU, dropout de 0,2 y una salida lineal. Se entrena con Adam y pérdida cuadrática durante 50 épocas, con lotes de 32 y una validación interna del 20\,\% del entrenamiento. Las variantes exploran dropout adicional, cambios en tasa de aprendizaje y parada temprana.
+
+El notebook importa una función de validación cruzada, pero el código conservado no acredita su ejecución para las métricas principales. El informe describe únicamente la partición realmente documentada.
+\par\medskip
+
+\section{Evaluación y resultados históricos de tráfico}
+Para un conjunto de prueba de tamaño $m$, se emplean:
+\begin{align}
+\operatorname{MAE}&=\frac1m\sum_{i=1}^{m}|y_i-\hat y_i|,\\
+\operatorname{RMSE}&=\sqrt{\frac1m\sum_{i=1}^{m}(y_i-\hat y_i)^2},\\
+R^2&=1-\frac{\sum_i(y_i-\hat y_i)^2}{\sum_i(y_i-\bar y_{\mathrm{test}})^2}.
+\end{align}
+MAE y RMSE conservan las unidades de la variable respuesta. $R^2$ es adimensional y puede ser negativo si el modelo presenta más error cuadrático que la referencia constante basada en la media del conjunto evaluado.
+
+\begin{table}[ht]\centering
+\caption{Métricas recuperadas de las salidas del notebook de 46 celdas. No son un reentrenamiento de 2026. Los errores se expresan en vehículos/día.}
+\begin{tabular}{lrrr}\toprule
+Modelo & RMSE & MAE & $R^2$\\\midrule
+Regresión lineal & 1.541,168 & 855,364 & 0,463083\\
+Random Forest & 718,597 & 204,994 & 0,883271\\
+XGBoost & 723,813 & 276,794 & 0,881571\\
+SVR & 2.126,629 & 754,138 & $-0,022328$\\
+MLP simple & 727,60 & 257,37 & 0,8803\\\bottomrule
+\end{tabular}\end{table}
+
+Random Forest registra el menor RMSE y MAE entre estas salidas. XGBoost y MLP obtienen valores de $R^2$ cercanos. La diferencia de RMSE entre Random Forest y XGBoost es de aproximadamente 5,22 vehículos/día, un 0,72\,\% respecto al error de XGBoost. Sin repeticiones o intervalos de incertidumbre no puede afirmarse que esa pequeña diferencia sea estable.
+
+El MAE de Random Forest es considerablemente menor que su RMSE, consistente con errores grandes en una fracción de observaciones. Un promedio global puede ocultar diferencias por peaje o categoría; conviene reportar también errores estratificados y una métrica que no quede dominada por las estaciones más transitadas.
+
+\figura{predicciones_vs_valores_reales_random_forest.png}{.72}{Figura histórica de Random Forest: predicciones frente a valores observados. La diagonal representa coincidencia perfecta; la dispersión aumenta para registros altos.}
+\par\medskip
+
+\section{Predicción de ingresos en cascada}
+\subsection{Diseño histórico}
+El esquema clásico ajusta un modelo de tráfico $\hat f$ y emplea su predicción como entrada adicional de un segundo modelo $\hat g$:
+\[
+\hat T_i=\hat f(x_i),\qquad \hat I_i=\hat g(x_i,\hat T_i).
+\]
+En los archivos, la primera etapa clásica es un Random Forest. La segunda etapa compara regresión lineal, Random Forest, XGBoost y SVR. También se implementa una cascada neuronal, cuya primera etapa es el MLP simple y cuya segunda etapa es otra red.
+
+El póster afirma $R^2>0,80$ para los árboles en ingresos y aproximadamente 0,73 para la ANN mejorada. El notebook más amplio conserva el código y una interpretación cualitativa, pero no las salidas numéricas completas de esos experimentos. Por tanto, estas cifras se citan como \textbf{afirmaciones del póster}, sin inventar una tabla detallada de RMSE o MAE.
+
+\subsection{Fuga identificada en la cascada clásica}
+El notebook clona el bosque y lo ajusta con \textbf{todas} las filas de $X$ y $T$. Después genera tráfico predicho sobre esas mismas filas y recién entonces separa entrenamiento y prueba de ingresos. Así, el predictor auxiliar de las filas de prueba ya depende de su tráfico real durante el ajuste de la primera etapa.
+
+Como el ingreso se construye a partir de ese tráfico, el segundo modelo recibe información del resultado que supuestamente no debía conocer. La magnitud del sesgo no puede determinarse sin rehacer la evaluación, pero la métrica resultante no debe interpretarse como error fuera de muestra de una cascada desplegable.
+
+\subsection{Referencia algebraica y propagación del error}
+La identidad observada en el CSV sugiere una referencia inmediata:
+\[
+\hat I_i^{\mathrm{ref}}=p_i\hat T_i.
+\]
+No requiere entrenar una segunda etapa. Si $e_i=\hat T_i-T_i$, entonces:
+\[
+\hat I_i^{\mathrm{ref}}-I_i=p_ie_i,\qquad
+\operatorname{MSE}_I=\frac1m\sum_i p_i^2e_i^2.
+\]
+El error de tráfico en tarifas altas recibe mayor peso en ingresos. Por ello, el mejor modelo de tráfico según RMSE global no necesariamente minimiza el error de ingresos. No basta comparar $R^2$ entre las dos tareas para diagnosticar propagación de error.
+
+Para evaluar una segunda etapa de forma válida, primero debe reservarse una prueba externa. Las entradas auxiliares de entrenamiento se generan mediante predicciones fuera de pliegue; para prueba se emplea únicamente el modelo ajustado con entrenamiento. Todos los preprocesadores deben respetar estas mismas fronteras. La referencia multiplicativa debe evaluarse sobre exactamente las mismas filas.
+\par\medskip
+
+\section{Redes neuronales y revisión de las variantes}
+La experimentación neuronal explora capacidad, regularización y optimización. La red equilibrada mantiene capas de 64 y 32 unidades, añade dropout y utiliza una tasa inicial de $5\times10^{-4}$. Otra variante prueba $2\times10^{-3}$. La versión con parada temprana monitoriza pérdida de validación y restaura los mejores pesos, con un máximo de 100 épocas.
+
+En ingresos, la red de mayor profundidad utiliza capas de 128, 64, 32 y 16 unidades, dropout de 0,12, 0,12 y 0,1, Adam con tasa $10^{-4}$, lotes de 64 y hasta 120 épocas. Aumentar profundidad no asegura una mejor representación para este conjunto: su utilidad debe decidirse mediante una validación que controle el procedimiento completo.
+
+\figura{evolucion_funcion_perdida_mlp_early_stopping.png}{.82}{Figura histórica del MLP con parada temprana. Las curvas describen la optimización del experimento; no sustituyen una prueba externa independiente.}
+
+\subsection{Precauciones específicas}
+En varias celdas, estandarización y codificación se ajustan antes de separar las filas. El efecto de esta contaminación no es equivalente al de utilizar directamente etiquetas de prueba, pero sí hace que información sobre su distribución entre al entrenamiento. En una evaluación corregida, esas transformaciones se ajustan exclusivamente dentro de cada partición de entrenamiento.
+
+La comparación repetida de variantes con el mismo conjunto de prueba convierte ese conjunto en parte del proceso de selección. Una validación interna debe seleccionar arquitectura y tasa de aprendizaje; una prueba final debe permanecer sin consultar hasta fijar el procedimiento.
+
+La cascada neuronal usa el objeto \campo{model}, correspondiente al MLP inicial; no utiliza automáticamente la variante con parada temprana. Además, reutiliza variables de preprocesamiento redefinidas en celdas posteriores. Esta dependencia del estado de ejecución dificulta interpretar una ejecución parcial. La versión editorial conserva ese diseño histórico y lo identifica expresamente.
+
+También se corrigió un mensaje que, en el ensayo de tasa de aprendizaje alta, imprimía las métricas de la red previa en lugar de las recién calculadas. Esta corrección de presentación no añade evidencia de desempeño: las salidas de ese experimento no están conservadas en la versión más amplia.
+\par\medskip
+
+\section{Limitaciones y protocolo de validación recomendado}
+\subsection{Dependencia temporal y por estación}
+Registros de un mismo peaje, categoría o periodos cercanos pueden compartir estructura. Una partición aleatoria permite que entrenamiento y prueba contengan contextos muy similares. Esto es apropiado para una pregunta de interpolación entre registros comparables, pero insuficiente para afirmar pronóstico o transferencia geográfica.
+
+Una evaluación temporal debe entrenar con intervalos finalizados antes de una fecha de corte y evaluar intervalos que empiecen después. Una evaluación por grupos debe dejar estaciones completas fuera del entrenamiento. Son preguntas distintas y deben reportarse por separado. La extrapolación a estaciones nuevas también necesita predictores que describan sus características; una identidad categórica de peaje no proporciona por sí sola esa información.
+
+\subsection{Representatividad y calidad}
+No se acredita cobertura exhaustiva de todos los peajes colombianos. Tampoco se ha verificado continuidad mensual por estación ni uniformidad de las categorías tarifarias. La eliminación inicial de nulos puede introducir selección. Las tarifas de distintos años están en COP nominales y no se ajustan por inflación. El conjunto incluye un periodo de cambio pronunciado en movilidad, que puede volver inestable una relación aprendida con otras fechas.
+
+Los campos evasores y exentos permiten análisis adicionales, pero no corrigen por sí mismos el ingreso calculado. Los intervalos deben revisarse para detectar posibles solapamientos y distinguir cambios tarifarios dentro del mes. La comprobación de duplicados completos no equivale a demostrar ausencia de duplicación conceptual.
+
+\subsection{Pasos para una continuación del estudio}
+\begin{enumerate}
+\item Recuperar la fuente original y su licencia; verificar definición de tráfico, categorías, coordenadas y extremos de cada intervalo.
+\item Fijar la pregunta de aplicación: interpolación, pronóstico futuro o estaciones desconocidas. Reservar una prueba acorde con esa pregunta.
+\item Ajustar transformaciones únicamente sobre entrenamiento y seleccionar hiperparámetros mediante validación interna.
+\item Comparar una media de referencia, regresión, árboles y redes sobre las mismas particiones; incluir tarifa por tráfico predicho para ingresos.
+\item Si se mantiene una cascada aprendida, generar predicciones fuera de pliegue para la segunda etapa. Preservar toda la prueba externa sin utilizar.
+\item Repetir cuando corresponda con varias semillas o cortes temporales; reportar dispersión y errores por peaje, categoría y magnitud de tráfico.
+\end{enumerate}
+
+\section{Evaluación adicional realizada en 2026}
+Se ejecutó el script de referencia con Python 3.11.13, scikit-learn 1.8.0, NumPy 1.26.4 y pandas 2.2.3. En la división aleatoria, el bosque reproduce las métricas históricas hasta los decimales conservados. El ingreso se calcula como tarifa por tráfico predicho, sin segundo modelo.
+
+\begin{table}[ht]\centering\small
+\caption{Evaluación adicional: RF para tráfico y referencia multiplicativa para ingresos.}
+\begin{tabular}{lrrrr}\toprule
+División & RMSE tráfico & $R^2_T$ & RMSE ingreso (COP/día) & $R^2_I$\\\midrule
+Aleatoria & 718,597 & 0,883271 & 7.504.216 & 0,877691\\
+Temporal & 1.169,650 & 0,790748 & 12.789.478 & 0,767151\\\bottomrule
+\end{tabular}\end{table}
+
+La división temporal utiliza 16.705 registros de entrenamiento con fin anterior a enero de 2021 y 10.281 de prueba con inicio desde esa fecha. No excluye filas en este conjunto. Aparecen categorías de peaje o duración ausentes en entrenamiento; el codificador las representa con ceros mediante \campo{handle_unknown='ignore'}. La disminución de desempeño ilustra sensibilidad al criterio de separación, pero los conjuntos de prueba son diferentes: no puede atribuirse todo el cambio a una sola causa. Este resultado no valida la cascada original ni sustituye una evaluación por estaciones completas.
+
+\section{Conclusiones}
+El experimento histórico demuestra la utilidad de un flujo de trabajo que combina exploración, transformación de variables y comparación de modelos tabulares. Random Forest, XGBoost y MLP alcanzan resultados cercanos en tráfico; el bosque tiene los menores errores entre las salidas numéricas recuperadas.
+
+La evidencia disponible no establece superioridad universal, estabilidad entre particiones ni robustez fuera del periodo estudiado. La cascada clásica requiere reevaluación por la fuga identificada. La identidad ingreso--tarifa--tráfico proporciona una referencia transparente que faltaba en la comparación original. El valor del proyecto reside tanto en sus resultados exploratorios como en las decisiones de validación que permite formular con mayor precisión.
+\par\medskip
+
+\clearpage\appendix\small
+\section{Organización, reproducción y evidencia}
+\subsection{Documentos y archivos conservados}
+El repositorio contiene el póster con referencias, una vista previa ligera, el presente informe y su fuente LaTeX, el CSV procesado, las figuras originales seleccionadas y un notebook consolidado. El manifiesto \campo{docs/seleccion_archivos.json} documenta decisiones de inclusión y huellas SHA-256 de los archivos originales.
+
+El CSV conserva sus bytes, incluida la columna de índice de exportación. La lectura analítica retira esa columna sin modificar el archivo. La auditoría del CSV y las estadísticas descriptivas están en \campo{resultados/}. Los mapas redundantes se retiraron del notebook editorial y el mapa conservado corrige el intercambio de coordenadas.
+
+\subsection{Resultados de 2025 y comprobaciones adicionales}
+Las métricas históricas de tráfico se extraen de salidas guardadas del notebook intermedio; las del MLP están redondeadas en su mensaje original. El notebook más completo incluye código de los experimentos posteriores, pero no todas sus salidas. Las figuras se preservan como evidencia visual histórica, sin presentarlas como resultados de una nueva ejecución.
+
+El script \campo{scripts/evaluar_referencia.py} ofrece una evaluación adicional y separada: ajusta preprocesamiento y Random Forest solo con entrenamiento, evalúa tráfico y calcula ingreso multiplicando tarifa por tráfico predicho. Admite una división aleatoria 80/20 y una temporal con corte en enero de 2021. No implementa ni pretende corregir todos los experimentos neuronales o de cascada de 2025.
+
+Los JSON que genere el script registran tamaños de muestra, criterio de separación, métricas y versiones del entorno. Esas salidas deben identificarse como evaluación adicional de 2026. Aun si una ejecución reproduce aproximadamente el bosque histórico, no equivale a recuperar el entorno de 2025.
+
+\subsection{Entorno y compilación}
+\campo{requirements.txt} describe dependencias modernas para el análisis clásico. \campo{requirements-neuronales.txt} añade TensorFlow como componente opcional. No se dispone de un archivo de versiones congeladas del entrenamiento original; la semilla de partición no determina por sí sola todos los resultados de las redes neuronales.
+
+Para compilar este informe, situarse en \campo{informe/} y ejecutar dos veces \campo{pdflatex} con las opciones \campo{-interaction=nonstopmode} y \campo{-halt-on-error}, seguidas de \campo{Informe_peajes_2025.tex}. Las figuras se resuelven mediante rutas relativas a \campo{../figuras/}. También puede cargarse el repositorio en un proyecto LaTeX y seleccionar este archivo como documento principal.
+
+\section{Referencias y fuentes de reconstrucción}
+\begin{enumerate}
+\item Mendez Posada, B. \emph{Modelado predictivo del tráfico e ingresos en peajes colombianos mediante Machine Learning}. Póster del Workshop Nuevas Tendencias en Estadística, 2025. Fuente primaria del proyecto.
+\item Notebooks y CSV del archivo local \emph{poster workshop stats 2025.zip}. Fuente de código, salidas históricas y auditoría de datos.
+\item Géron, A. \emph{Hands-on Machine Learning with Scikit-Learn, Keras \& TensorFlow}, tercera edición, O'Reilly. Referencia bibliográfica incluida en el póster original.
+\item Hastie, T., Tibshirani, R. y Friedman, J. \emph{The Elements of Statistical Learning}. Springer, 2009. Referencia bibliográfica incluida en el póster original.
+\end{enumerate}
+\end{document}
+
+

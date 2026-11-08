@@ -1,0 +1,22 @@
+{
+  "estado": "evaluacion adicional de 2026; no es la cascada historica",
+  "division": "aleatoria",
+  "criterio": "80/20 de filas; semilla 42; no mide generalización a peajes nuevos",
+  "n_train": 21588,
+  "n_test": 5398,
+  "n_excluidas": 0,
+  "python": "3.11.13",
+  "sklearn": "1.8.0",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "trafico_rf": {
+    "RMSE": 718.5968454944384,
+    "MAE": 204.99404129370888,
+    "R2": 0.8832713498483183
+  },
+  "ingreso_tarifa_por_trafico_rf": {
+    "RMSE": 7504216.423201702,
+    "MAE": 2377207.44362717,
+    "R2": 0.8776910552987643
+  }
+}

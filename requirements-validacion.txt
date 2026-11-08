@@ -1,0 +1,5 @@
+# Entorno mínimo con el que se ejecutó scripts/evaluar_referencia.py.
+# Python utilizado: 3.11.13.
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.8.0

@@ -1,0 +1,6 @@
+modelo,RMSE,MAE,R2,fuente,estado
+Regresion lineal,1541.168007,855.364089,0.463083,notebook intermedio de 46 celdas; salidas conservadas en el ZIP original,historico; no reentrenado
+Random Forest,718.596845,204.994041,0.883271,notebook intermedio de 46 celdas; salidas conservadas en el ZIP original,historico; no reentrenado
+XGBoost,723.812612,276.794498,0.881571,notebook intermedio de 46 celdas; salidas conservadas en el ZIP original,historico; no reentrenado
+SVR,2126.628687,754.138413,-0.022328,notebook intermedio de 46 celdas; salidas conservadas en el ZIP original,historico; no reentrenado
+MLP simple,727.6,257.37,0.8803,notebook intermedio de 46 celdas; salidas conservadas en el ZIP original,historico; no reentrenado

@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "Si utilizas este proyecto, cita el póster de Bamsi Mendez Posada (2025) y distingue el informe retrospectivo de 2026."
+title: "Modelado predictivo del tráfico e ingresos en peajes colombianos mediante Machine Learning"
+authors:
+  - family-names: "Mendez Posada"
+    given-names: "Bamsi"
+    affiliation: "Universidad Nacional de Colombia, Sede Manizales"
+abstract: "Estudio exploratorio de regresión, ensambles y redes neuronales para tráfico e ingresos calculados en peajes colombianos. Póster de 2025 e informe retrospectivo de noviembre de 2026."

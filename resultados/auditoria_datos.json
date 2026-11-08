@@ -1,0 +1,11 @@
+{
+  "filas": 26986,
+  "columnas_analiticas": 16,
+  "peajes": 119,
+  "fecha_desde_min": "2019-01-01",
+  "fecha_hasta_max": "2022-02-28",
+  "nulos": 0,
+  "duplicados_sin_indice": 0,
+  "sha256_csv": "1fa83440e391fe548eabe74ea730146729afc53b2a2b06dfa2f0a77cf83a0027",
+  "identidad_ingreso_max_error_abs": 8.940696716308594e-08
+}

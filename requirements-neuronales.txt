@@ -1,0 +1,3 @@
+-r requirements.txt
+# Opcional: solo para las celdas de redes neuronales del notebook histórico.
+tensorflow>=2.16,<3

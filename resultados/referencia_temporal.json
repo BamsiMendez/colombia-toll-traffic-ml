@@ -1,0 +1,22 @@
+{
+  "estado": "evaluacion adicional de 2026; no es la cascada historica",
+  "division": "temporal",
+  "criterio": "entrenamiento: FechaHasta<2021-01-01; prueba: FechaDesde>=2021-01-01",
+  "n_train": 16705,
+  "n_test": 10281,
+  "n_excluidas": 0,
+  "python": "3.11.13",
+  "sklearn": "1.8.0",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "trafico_rf": {
+    "RMSE": 1169.6500291869042,
+    "MAE": 382.59396432481293,
+    "R2": 0.7907478056944593
+  },
+  "ingreso_tarifa_por_trafico_rf": {
+    "RMSE": 12789477.881524574,
+    "MAE": 5179208.556356351,
+    "R2": 0.7671513687979898
+  }
+}

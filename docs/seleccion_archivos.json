@@ -1,0 +1,134 @@
+[
+  {
+    "archivo_original": "1.1) poster.jpg",
+    "bytes": 19982825,
+    "sha256": "c3210dbad778bbb32495e0499febc920346f0405c39ea45d67eee82127bac40d",
+    "decision": "Omitido: versión alternativa o imagen de gran tamaño; se incluye vista previa ligera."
+  },
+  {
+    "archivo_original": "1.2) poster.pdf",
+    "bytes": 5268520,
+    "sha256": "c12dc90451b72d0fb117c6d9cdf695c0d984fab37544952992eb5b3913eba4fe",
+    "decision": "Omitido: versión alternativa o imagen de gran tamaño; se incluye vista previa ligera."
+  },
+  {
+    "archivo_original": "1.3) poster (con referencias).pdf",
+    "bytes": 7448790,
+    "sha256": "460f99ed0640a43c6e1daac8c86a52337bbf0c6f173d1a39dcaf5f317d7cc3a1",
+    "decision": "Incluido como poster/Poster_peajes_2025.pdf."
+  },
+  {
+    "archivo_original": "comparacion_metricas_error_modelos.png",
+    "bytes": 315375,
+    "sha256": "53c73b45e7eeedbda7d2ff471483f1cf31126148b131fefaa63c4764d6548d82",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "comparacion_r2_modelos.png",
+    "bytes": 419558,
+    "sha256": "5b21aae7df7480c320ee517b3b42905ea3940e50344aafd27d0e219528404505",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "Copia de Copia de Copia de Notebook poster Workshop en Estadística.ipynb",
+    "bytes": 960604,
+    "sha256": "cddc290b511158394a9a98899ea223ba023c7a3446682558fce13411622c3777",
+    "decision": "Consolidado en notebook histórico; métricas respaldadas extraídas de versión intermedia."
+  },
+  {
+    "archivo_original": "Copia de Copia de Notebook poster Workshop en Estadística.ipynb",
+    "bytes": 1035244,
+    "sha256": "5d3b1675a42adaa26c9c0acb39bd23871b86ab3aac91e92acd2928480b9911fc",
+    "decision": "Consolidado en notebook histórico; métricas respaldadas extraídas de versión intermedia."
+  },
+  {
+    "archivo_original": "Copia de Notebook poster Workshop en Estadística.ipynb",
+    "bytes": 817728,
+    "sha256": "8348472e06b5d18c8bf65b128a36d658c550b57857efce334ecd44dbca84d01d",
+    "decision": "Consolidado en notebook histórico; métricas respaldadas extraídas de versión intermedia."
+  },
+  {
+    "archivo_original": "df_filtered_2019_cats_oficiales (1).csv",
+    "bytes": 3765772,
+    "sha256": "1fa83440e391fe548eabe74ea730146729afc53b2a2b06dfa2f0a77cf83a0027",
+    "decision": "Incluido sin alterar bytes; documentado en datos/README.md."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_ann_cascada.png",
+    "bytes": 449542,
+    "sha256": "6df197d009fb90cc2bd45afdab37fe696649457c1b0bc5daa4162926e5d80c70",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_ann_cascada_mejorada.png",
+    "bytes": 430992,
+    "sha256": "b413da98a4a187274ce0c793f2c1b82b47ce2d86d08dd911b9f19b9b3a26ea04",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_mlp.png",
+    "bytes": 366121,
+    "sha256": "e08c4744f5ca998a8d1a260852e517368e4125e07bd1415eaa771eb298ac3c2d",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_mlp_early_stopping.png",
+    "bytes": 386445,
+    "sha256": "7242324a78ec02254dc5ab4416ef68a01f030d6f1cf40f6997be7c37553c17e1",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_mlp_equilibrado.png",
+    "bytes": 407553,
+    "sha256": "ea6dbc07aecbb310faa980cbe8cbf344cf2c5f7c2daaf87377d43dfa9a48a67d",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "evolucion_funcion_perdida_mlp_lr_mas_alto.png",
+    "bytes": 371389,
+    "sha256": "bbe1715214ff467d9c3ebc451ea67a450e29fbd90c8d37a72461fc9f92253ce8",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "importancia_caracteristicas_random_forest.png",
+    "bytes": 633657,
+    "sha256": "d8f3adad415b2f2502cf45d2102632a9a493ac5f1a11e7822c5622ce1360a809",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "matriz_de_correlacion_peajes.png",
+    "bytes": 1247734,
+    "sha256": "af8aca121dc0bc1c7d45003c299d9a7e530532b37e5306b777babdb8d02717b1",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "predicciones_vs_valores_reales_ann_cascada_mejorada.png",
+    "bytes": 1879255,
+    "sha256": "8561af3d125e41cca015895080dcdc2edc6a32b5c15cf83e0433cd01f8a93b14",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "predicciones_vs_valores_reales_random_forest.png",
+    "bytes": 1752089,
+    "sha256": "3fac2b3d24cb2bacffc2e6cce444ba91035ef77811ec426854cdd5bb56935193",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "relacion_valor_tarifa_&_trafico_promedio_diario.png",
+    "bytes": 3042655,
+    "sha256": "a21e0ce3d478e99f6ac1bfb05476db54c4bc988fec3567bf714371bdfcb1c218",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "serie_tiempo_trafico_nacional.png",
+    "bytes": 1041046,
+    "sha256": "2197b37223b484e0a5a7f8fb751f78bb08b148bc09a134a59db5215c24f3b183",
+    "decision": "Incluido en figuras/."
+  },
+  {
+    "archivo_original": "top_10_peajes_por_trafico_total.png",
+    "bytes": 795779,
+    "sha256": "6e7397e7f8b62ed7ac24e01f9455c36ea3248f2478325e6192cbbdbf1b908a12",
+    "decision": "Incluido en figuras/."
+  }
+]
